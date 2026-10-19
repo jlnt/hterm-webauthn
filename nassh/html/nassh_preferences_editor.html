@@ -165,6 +165,30 @@
 
               <ul id="ssh-files-identities"></ul>
             </section>
+
+            <section id="ssh-files-security-keys-section">
+              <h3>
+                <span i18n='{"_": "WEBAUTHN_KEYS_HEADER"}'></span>
+                <span class="float-right" i18n='{"_": "PREFERENCES_KEY_IS_SYNCED"}'></span>
+              </h3>
+
+              <p i18n='{"_": "WEBAUTHN_KEYS_EXPLAIN"}'></p>
+              <ul id="ssh-files-security-keys"></ul>
+              <input
+                id="ssh-files-security-keys-name"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                i18n='{"placeholder": "WEBAUTHN_KEYS_NAME_PLACEHOLDER"}'
+              />
+              <label>
+                <input id="ssh-files-security-keys-resident" type="checkbox" />
+                <span i18n='{"_": "WEBAUTHN_ENROLL_RESIDENT"}'></span>
+              </label>
+              <button id="ssh-files-security-keys-create" i18n='{"_": "WEBAUTHN_KEYS_CREATE"}'></button>
+              <button id="ssh-files-security-keys-import" i18n='{"_": "WEBAUTHN_KEYS_IMPORT"}'></button>
+              <p id="ssh-files-security-keys-status" role="status"></p>
+            </section>
           </div>
         </div>
 

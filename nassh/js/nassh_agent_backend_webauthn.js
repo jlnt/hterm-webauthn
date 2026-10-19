@@ -131,6 +131,8 @@ export class WebAuthn extends Backend {
   /**
    * Prompt the user to create (or import) a key if none is set up yet.
    *
+   * More keys can be added in the options page.
+   *
    * @return {!Promise<void>}
    */
   async maybeEnroll_() {

@@ -21,11 +21,20 @@ lives on the authenticator, and each login requires a touch.
    login method this one time).
 4. Reconnect.  Touch the key when asked.
 
-Keys are stored (public data only: public key, credential ID and RP ID) in
-synced extension storage, so they follow you to other devices where you're
-signed in to Chrome.
+To add more keys later (e.g. a backup key), use Options → SSH Files (see
+[Managing keys](#managing-keys)).  Keys are stored (public data only: public
+key, credential ID and RP ID) in synced extension storage, so they follow you
+to other devices where you're signed in to Chrome.
 
 Agent forwarding (`-A`) works; every signature still needs a physical touch.
+
+## Managing keys
+
+Options → **SSH Files** → **Security keys (WebAuthn)** lists your keys.  From
+there you can copy a key's public key (e.g. if you didn't save the line
+printed when it was created), forget a key (click 🗑 twice; also remove it
+from `authorized_keys` on your servers), and create or import keys without
+connecting anywhere.
 
 ## Where the private key lives
 
@@ -44,7 +53,8 @@ reference to it (the WebAuthn credential ID) lives:
   one of the security key's slots (25 on older YubiKey 5 firmware, 100 on 5.7+)
   and security keys usually require a FIDO2 PIN for it.  In return, the key
   goes wherever the security key goes: on another computer (or after wiping
-  Chrome's data), leave the name empty at the prompt to import it.  You touch
+  Chrome's data), leave the name empty at the prompt to import it, or use
+  **Import from security key** in Options → SSH Files.  You touch
   the key twice (and may enter the PIN): WebAuthn doesn't reveal the public
   key of an existing credential, so Secure Shell recovers it from two
   signatures.  Resident keys can be listed & deleted with

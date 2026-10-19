@@ -99,7 +99,7 @@ The following backends are currently implemented:
   Supports SSH authentication using FIDO2/U2F security keys (or passkeys) via
   the browser's WebAuthn API, using OpenSSH `sk-ecdsa-sha2-nistp256` keys.
   If no key has been set up yet, offers to create (or import) one when
-  connecting.
+  connecting.  Keys can be managed in Options → SSH Files.
   See [security-keys.md](./security-keys.md) for details.
 
 ## `--ssh-agent=<extension id>`

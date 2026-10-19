@@ -262,7 +262,7 @@ The vast majority of the code here lives under [js/].
     (OpenSSH `sk-ecdsa` keys) via the browser's WebAuthn API.
   * [nassh_webauthn_keys.js]:
     Creating, importing & storing the security keys used by the webauthn
-    backend.
+    backend and the options page.
 
 There are a few specialized modules that are not relevant to the core
 Secure Shell logic.

@@ -2645,6 +2645,72 @@
 		"description": "Shown by the 'webauthn' SSH agent backend when importing an SSH key stored on the security key needs a second touch to finish.",
 		"message": "Touch your security key again to finish importing the key..."
 	},
+	"WEBAUTHN_KEYS_COPIED": {
+		"description": "Shown after copying an SSH key's public key to the clipboard. NAME is the name the user gave the key. '~/.ssh/authorized_keys' is a file path and must not be translated.",
+		"message": "Copied the public key of \"$NAME$\".  Add it to ~/.ssh/authorized_keys on your servers.",
+		"placeholders": {
+			"NAME": {
+				"content": "$1",
+				"example": "yubikey-5c"
+			}
+		}
+	},
+	"WEBAUTHN_KEYS_COPY": {
+		"description": "Button that copies an SSH key's public key (in authorized_keys format) to the clipboard.",
+		"message": "Copy public key"
+	},
+	"WEBAUTHN_KEYS_CREATE": {
+		"description": "Button that creates a new SSH key on a security key.",
+		"message": "Create key"
+	},
+	"WEBAUTHN_KEYS_DELETE": {
+		"description": "Tooltip of the button that makes Secure Shell forget an SSH key on a security key, and its label while waiting for the user to click it again to confirm.",
+		"message": "Forget this key"
+	},
+	"WEBAUTHN_KEYS_DELETE_CONFIRM": {
+		"description": "Shown after clicking the button to forget an SSH key on a security key, asking to click it again to confirm. NAME is the name the user gave the key. '~/.ssh/authorized_keys' is a file path and must not be translated.",
+		"message": "Click again to forget the key \"$NAME$\".  Also remove it from ~/.ssh/authorized_keys on your servers.",
+		"placeholders": {
+			"NAME": {
+				"content": "$1",
+				"example": "yubikey-5c"
+			}
+		}
+	},
+	"WEBAUTHN_KEYS_EMPTY": {
+		"description": "Shown in the SSH Files options page when no security keys are set up yet.",
+		"message": "No security keys set up yet."
+	},
+	"WEBAUTHN_KEYS_EXPLAIN": {
+		"description": "Explanation in the SSH Files options page for the security keys section. '--ssh-agent=webauthn' is a command line option and must not be translated.",
+		"message": "SSH keys on security keys, used by connections with the SSH relay server option --ssh-agent=webauthn.  Add a key's public key to ~/.ssh/authorized_keys on your servers."
+	},
+	"WEBAUTHN_KEYS_HEADER": {
+		"description": "Header in the SSH Files options page for the list of SSH keys on security keys (FIDO2/U2F hardware tokens like a YubiKey) used via the Web Authentication (WebAuthn) API. 'WebAuthn' is a technical name and probably should not be translated.",
+		"message": "Security keys (WebAuthn)"
+	},
+	"WEBAUTHN_KEYS_IMPORT": {
+		"description": "Button that imports an SSH key previously stored on a security key, e.g. when using another computer.",
+		"message": "Import from security key"
+	},
+	"WEBAUTHN_KEYS_NAME_PLACEHOLDER": {
+		"description": "Placeholder text in the field for naming a new SSH key on a security key.",
+		"message": "Name for a new key"
+	},
+	"WEBAUTHN_KEYS_READY": {
+		"description": "Shown after creating or importing an SSH key on a security key. NAME is the name the user gave the key.",
+		"message": "\"$NAME$\" is ready.  Copy its public key to add it to your servers.",
+		"placeholders": {
+			"NAME": {
+				"content": "$1",
+				"example": "yubikey-5c"
+			}
+		}
+	},
+	"WEBAUTHN_KEYS_STORED_ON_KEY": {
+		"description": "Shown next to an SSH key that is stored on the security key itself (a FIDO2 resident / discoverable credential), so it can be imported on other computers.",
+		"message": "stored on the security key"
+	},
 	"WEBAUTHN_SIGN_TOUCH": {
 		"description": "Shown by the 'webauthn' SSH agent backend while waiting for the user to touch their security key (a FIDO2/U2F hardware token like a YubiKey) to log in. NAME is the name the user gave the key.",
 		"message": "Touch your security key to authenticate with \"$NAME$\"...",
