@@ -27,6 +27,7 @@ export const MessageNumbers = {
   AGENT_IDENTITIES_ANSWER: 12,
   AGENTC_SIGN_REQUEST: 13,
   AGENT_SIGN_RESPONSE: 14,
+  AGENTC_EXTENSION: 27,
   AGENT_PUBLIC_KEY_RESPONSE: 114,
 };
 
@@ -98,6 +99,21 @@ readers[MessageNumbers.AGENTC_SIGN_REQUEST] = function(message) {
   if (!message.eom()) {
     throw new Error('AGENTC_SIGN_REQUEST: message body longer than expected');
   }
+  return message;
+};
+
+/**
+ * Read an AGENTC_EXTENSION request.
+ *
+ * Only the extension name is parsed; the contents are extension specific.
+ *
+ * @see https://datatracker.ietf.org/doc/html/draft-miller-ssh-agent#name-extension-mechanism
+ * @param {!Message} message A message of type AGENTC_EXTENSION.
+ * @return {!Message}
+ */
+readers[MessageNumbers.AGENTC_EXTENSION] = function(message) {
+  message.fields.extensionType =
+      lib.codec.codeUnitArrayToString(message.readString());
   return message;
 };
 

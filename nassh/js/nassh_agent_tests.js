@@ -6,7 +6,8 @@
  * @fileoverview Test suite for the generic SSH agent in Agent.
  */
 
-import {keyBlobToAuthorizedKeysFormat} from './nassh_agent.js';
+import {Agent, keyBlobToAuthorizedKeysFormat} from './nassh_agent.js';
+import {MessageNumbers} from './nassh_agent_message_types.js';
 
 it('keyBlobToAuthorizedKeysFormat', () => {
   // eslint-disable-next-line
@@ -20,4 +21,15 @@ it('keyBlobToAuthorizedKeysFormat', () => {
   assert.equal(
       keyBlobToAuthorizedKeysFormat(Uint8Array.fromBase64(keyTypeEd25519)),
       'ssh-ed25519 ' + keyTypeEd25519);
+});
+
+it('rejects unsupported extensions', async () => {
+  const agent = new Agent([], /** @type {?} */ (null), false);
+  // SSH_AGENTC_EXTENSION "session-bind@openssh.com" w/dummy contents.
+  const name = new TextEncoder().encode('session-bind@openssh.com');
+  const body = [MessageNumbers.AGENTC_EXTENSION, 0, 0, 0, name.length, ...name,
+                1, 2, 3];
+  const raw = new Uint8Array([0, 0, 0, body.length, ...body]);
+  const reply = await agent.handleRequest(raw);
+  assert.equal(reply.type, MessageNumbers.AGENT_FAILURE);
 });

@@ -259,6 +259,25 @@ Agent.prototype.requestHandlers_[MessageNumbers.AGENTC_SIGN_REQUEST] =
 };
 
 /**
+ * Handle an AGENTC_EXTENSION request.
+ *
+ * We don't implement any extensions, so reply with AGENT_FAILURE as the
+ * protocol requires.  OpenSSH clients send "session-bind@openssh.com" on every
+ * connection, so this is expected and not worth logging as an error.
+ *
+ * @this {Agent}
+ * @see https://datatracker.ietf.org/doc/html/draft-miller-ssh-agent#name-extension-mechanism
+ * @param {!Message} request The request as a Message object.
+ * @return {!Promise<!Message>}
+ */
+Agent.prototype.requestHandlers_[MessageNumbers.AGENTC_EXTENSION] =
+    function(request) {
+  console.debug(
+      `Agent: unsupported extension '${request.fields.extensionType}'`);
+  return Promise.resolve(FAILURE);
+};
+
+/**
  * Provide helper functions for terminal IO tasks needed by backends.
  *
  * @param {!hterm.Terminal} term Reference to the current terminal.
