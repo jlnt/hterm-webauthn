@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+# Copyright 2026 The ChromiumOS Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+"""Package the mkdist output for side-loading via "Load unpacked".
+
+mkdist strips the manifest "key" since the Web Store assigns its own.  When
+side-loading, that would make the extension ID depend on the directory it is
+loaded from.  WebAuthn credentials (see docs/security-keys.md) are bound to
+the extension ID, so we put the key back to keep the ID stable.
+"""
+
+import json
+import shutil
+import sys
+
+import nassh  # pylint: disable=wrong-import-order
+import libdot
+
+
+DIST_DIR = nassh.DIR / "dist"
+
+
+def get_parser():
+    """Get a command line parser."""
+    parser = libdot.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--name",
+        default="Secure Shell (WebAuthn)",
+        help="Extension name to show in chrome://extensions.",
+    )
+    parser.add_argument(
+        "--suffix",
+        default="unpacked",
+        help="Suffix for the archive name.",
+    )
+    return parser
+
+
+def main(argv):
+    """The main func!"""
+    parser = get_parser()
+    opts = parser.parse_args(argv)
+
+    with (nassh.DIR / "manifest.json").open(encoding="utf-8") as fp:
+        src_manifest = json.load(fp)
+    version = src_manifest["version"]
+
+    # The stable channel tree mkdist left behind.
+    src = DIST_DIR / "tmp" / f"SecureShell-{version}"
+    if not src.is_dir():
+        parser.error(f"{src} missing; run mkdist first")
+
+    basename = f"SecureShell-{opts.suffix}-{version}"
+    dst = DIST_DIR / "tmp" / basename
+    if dst.exists():
+        shutil.rmtree(dst)
+    shutil.copytree(src, dst)
+
+    manifest = dst / "manifest.json"
+    with manifest.open(encoding="utf-8") as fp:
+        data = json.load(fp)
+    data["key"] = src_manifest["key"]
+    data["name"] = opts.name
+    with manifest.open("w", encoding="utf-8") as fp:
+        json.dump(data, fp, separators=(",", ":"), sort_keys=True)
+
+    archive = DIST_DIR / f"{basename}.zip"
+    archive.unlink(missing_ok=True)
+    # Put everything under a top-level dir so unzipping yields one folder to
+    # point "Load unpacked" at.
+    libdot.run(["zip", "-rq", str(archive), basename], cwd=dst.parent)
+    print(archive)
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

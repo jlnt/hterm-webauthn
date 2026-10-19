@@ -6,6 +6,30 @@ Titan, SoloKey, Nitrokey, …) or a passkey, using the same
 `ssh-keygen -t ecdsa-sk`.  No private key file is involved: the private key
 lives on the authenticator, and each login requires a touch.
 
+## Install (prebuilt)
+
+This fork's CI builds the extension on every push.  Grab
+`SecureShell-webauthn-*.zip` from the
+Releases page of this repository (the rolling `latest`
+pre-release), unzip it somewhere permanent, then in `chrome://extensions`
+enable **Developer mode**, click **Load unpacked** and pick the unzipped
+folder.
+
+The build keeps the upstream dev-channel extension ID
+(`algkcnfjnajfhgimadimbjhmpaeohhln`).  That matters for two reasons:
+
+* Chrome only grants `chrome.sockets` (direct TCP connections) to Secure
+  Shell's known IDs; a fresh ID would leave you needing a relay.
+* WebAuthn credentials are bound to the extension's origin
+  (`chrome-extension://algkcnfjnajfhgimadimbjhmpaeohhln`), so a stable ID keeps
+  your enrolled keys working across reinstalls and machines.
+
+As a consequence it can't be installed next to "Secure Shell (dev)" from the
+Web Store, but it can sit next to the regular Secure Shell.
+
+To build it yourself: `./nassh/bin/mkdist && ./nassh/bin/mkdist-unpacked`
+produces `nassh/dist/SecureShell-unpacked-<version>.zip`.
+
 ## Quick start
 
 1. Open Secure Shell, create a connection and set its SSH relay server

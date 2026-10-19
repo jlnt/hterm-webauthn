@@ -1,0 +1,156 @@
+# Build Secure Shell, run the tests, and publish the extension zip.
+#
+# * Every push/PR: build, unit tests, and an end-to-end security key login.
+# * Pushes to main or the webauthn branch: also refresh the rolling "latest"
+#   pre-release.
+# * Tags named v*: publish a regular release for that tag.
+name: Build
+
+on:
+  push:
+    branches: [main, webauthn]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # mkdeps generates the changelog from history since the last
+          # nassh-* tag.
+          fetch-depth: 0
+
+      # Upstream tags each release nassh-<version>, but those tags may not be
+      # mirrored into this fork.  Fall back to tagging the newest upstream
+      # (Gerrit reviewed) commit so the changelog only covers our changes.
+      - name: Ensure a nassh-* release tag
+        run: |
+          git describe --tags --abbrev=0 --match 'nassh-*' HEAD 2>/dev/null ||
+            git tag "nassh-$(jq -r .version nassh/manifest.json)" \
+                "$(git log -1 --format=%H \
+                     --grep='^Reviewed-on: https://chromium-review')"
+
+      # Upstream's tooling (e.g. nassh/bin/lint's glob patterns) needs 3.13+,
+      # matching the Debian trixie container upstream's CI uses.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install system packages
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends \
+              openssh-server zip unzip xz-utils
+
+      # Chrome's sandbox doesn't work under the runner's AppArmor policy.
+      - name: Chrome wrapper for tests
+        run: |
+          printf '#!/bin/sh\nexec google-chrome --no-sandbox "$@"\n' \
+              > "$RUNNER_TEMP/chrome"
+          chmod +x "$RUNNER_TEMP/chrome"
+          echo "CHROME_BIN=$RUNNER_TEMP/chrome" >> "$GITHUB_ENV"
+
+      # Fetches node & npm deps, the prebuilt WASM ssh plugin & fonts, then
+      # builds the extension zips into nassh/dist/.
+      - name: Build
+        run: ./nassh/bin/mkdist
+
+      - name: Package for "Load unpacked"
+        run: ./nassh/bin/mkdist-unpacked
+
+      # Upstream's full lint: eslint, closure-compiler type checks & pylint.
+      - name: Lint
+        run: |
+          pip install --quiet pylint black
+          ./nassh/bin/lint --skip-mkdeps
+
+      - name: Unit tests
+        run: ./nassh/bin/load_tests --skip-mkdeps
+
+      - name: End-to-end security key login
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+          ./nassh/test/webauthn_e2e/run.sh
+
+      - name: Name artifact
+        id: name
+        run: |
+          src=$(ls nassh/dist/SecureShell-unpacked-*.zip)
+          version=$(basename "$src" .zip | sed 's/^SecureShell-unpacked-//')
+          name="SecureShell-webauthn-${version}-$(git rev-parse --short HEAD).zip"
+          cp "$src" "nassh/dist/$name"
+          echo "zip=nassh/dist/$name" >> "$GITHUB_OUTPUT"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.name.outputs.name }}
+          path: ${{ steps.name.outputs.zip }}
+          if-no-files-found: error
+
+    outputs:
+      name: ${{ steps.name.outputs.name }}
+
+  release:
+    needs: build
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      ZIP: ${{ needs.build.outputs.name }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.name }}
+
+      - name: Write release notes
+        run: |
+          cat > notes.md <<EOF
+          Secure Shell with FIDO2/U2F security key (WebAuthn) support.
+          Built from ${GITHUB_SHA} on \`${GITHUB_REF_NAME}\`.
+
+          ### Install
+          1. Download and unzip \`${ZIP}\`.
+          2. Open \`chrome://extensions\`, enable **Developer mode**, click
+             **Load unpacked** and pick the unzipped \`SecureShell-unpacked-*\`
+             folder.  Keep the folder; Chrome loads it from there.
+          3. In a connection, set **SSH relay server options** to
+             \`--ssh-agent=webauthn\`, connect, and follow the prompts.
+
+          The extension ID is \`algkcnfjnajfhgimadimbjhmpaeohhln\` (the same as
+          the upstream dev channel build, which Chrome requires for direct TCP
+          connections), so it can't be installed alongside "Secure Shell (dev)"
+          from the Web Store.  It can sit next to the regular Secure Shell.
+
+          See [security-keys.md](https://github.com/${GH_REPO}/blob/${GITHUB_SHA}/nassh/docs/security-keys.md).
+          EOF
+
+      - name: Publish tagged release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          gh release create "$GITHUB_REF_NAME" "$ZIP" \
+              --title "Secure Shell WebAuthn $GITHUB_REF_NAME" \
+              --notes-file notes.md
+
+      - name: Update rolling "latest" pre-release
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest "$ZIP" \
+              --target "$GITHUB_SHA" --prerelease \
+              --title "Latest build (${GITHUB_REF_NAME})" \
+              --notes-file notes.md
