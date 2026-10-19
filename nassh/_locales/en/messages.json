@@ -2591,6 +2591,84 @@
 		"description": "The label for a URL. Used to label the URL of a background image. e.g. URL: https://hterm.org/x/example/bg-img",
 		"message": "URL"
 	},
+	"WEBAUTHN_ENROLL_DONE": {
+		"description": "Shown by the 'webauthn' SSH agent backend after a new SSH key was created on a security key. It is followed by a line with the public key, which the user needs to add to the ~/.ssh/authorized_keys file on the server. '~/.ssh/authorized_keys' is a file path and must not be translated.",
+		"message": "New key created.  Add this line to ~/.ssh/authorized_keys on the server:"
+	},
+	"WEBAUTHN_ENROLL_FAILED": {
+		"description": "Shown by the 'webauthn' SSH agent backend when creating a new SSH key on a security key failed. The ERROR parameter is a message from the browser and might not be translated.",
+		"message": "Creating key failed: $ERROR$",
+		"placeholders": {
+			"ERROR": {
+				"content": "$1",
+				"example": "The operation either timed out or was not allowed."
+			}
+		}
+	},
+	"WEBAUTHN_ENROLL_PROMPT": {
+		"description": "Prompt shown by the 'webauthn' SSH agent backend when connecting and no SSH key is set up yet for a security key (a FIDO2/U2F hardware token like a YubiKey). The user types a name for a new key and presses Enter, presses Enter with no name to import a key previously stored on the security key, or presses Escape to skip.",
+		"message": "Create a new SSH key on your security key: enter a name for it (e.g. \"yubikey-5c\").  To use a key already stored on your security key, leave the name empty.  Press Esc to skip."
+	},
+	"WEBAUTHN_ENROLL_RESIDENT": {
+		"description": "Checkbox label below WEBAUTHN_ENROLL_PROMPT. When checked, the new SSH key is stored on the security key itself (a FIDO2 'resident' or 'discoverable' credential), so it can be imported and used on other computers. Security keys usually require a PIN for this.",
+		"message": "Store the key on the security key, so it can be used from other computers (usually needs a security key PIN)"
+	},
+	"WEBAUTHN_ENROLL_TOUCH": {
+		"description": "Shown by the 'webauthn' SSH agent backend while waiting for the user to touch their security key (a FIDO2/U2F hardware token like a YubiKey) to create a new SSH key.",
+		"message": "Touch your security key to create a new SSH key..."
+	},
+	"WEBAUTHN_IMPORT_DONE": {
+		"description": "Shown by the 'webauthn' SSH agent backend after importing an SSH key that was stored on the security key. NAME is the name the user gave the key when creating it. It is followed by a line with the public key.",
+		"message": "Using the key \"$NAME$\" stored on your security key:",
+		"placeholders": {
+			"NAME": {
+				"content": "$1",
+				"example": "yubikey-5c"
+			}
+		}
+	},
+	"WEBAUTHN_IMPORT_FAILED": {
+		"description": "Shown by the 'webauthn' SSH agent backend when importing an SSH key stored on the security key failed. The ERROR parameter is a message from the browser and might not be translated.",
+		"message": "Importing the key failed: $ERROR$",
+		"placeholders": {
+			"ERROR": {
+				"content": "$1",
+				"example": "The operation either timed out or was not allowed."
+			}
+		}
+	},
+	"WEBAUTHN_IMPORT_TOUCH": {
+		"description": "Shown by the 'webauthn' SSH agent backend while waiting for the user to touch their security key (and maybe enter its PIN) to pick an SSH key stored on it.",
+		"message": "Touch your security key to choose an SSH key stored on it..."
+	},
+	"WEBAUTHN_IMPORT_TOUCH_AGAIN": {
+		"description": "Shown by the 'webauthn' SSH agent backend when importing an SSH key stored on the security key needs a second touch to finish.",
+		"message": "Touch your security key again to finish importing the key..."
+	},
+	"WEBAUTHN_SIGN_TOUCH": {
+		"description": "Shown by the 'webauthn' SSH agent backend while waiting for the user to touch their security key (a FIDO2/U2F hardware token like a YubiKey) to log in. NAME is the name the user gave the key.",
+		"message": "Touch your security key to authenticate with \"$NAME$\"...",
+		"placeholders": {
+			"NAME": {
+				"content": "$1",
+				"example": "yubikey-5c"
+			}
+		}
+	},
+	"WEBAUTHN_SIGN_TOUCH_FORWARDED": {
+		"description": "Same as WEBAUTHN_SIGN_TOUCH, but shown when the SSH agent is forwarded to the server, so the request might come from the remote server rather than this connection. NAME is the name the user gave the key.",
+		"message": "Touch your security key to authenticate with \"$NAME$\" (request via forwarded agent)...",
+		"placeholders": {
+			"NAME": {
+				"content": "$1",
+				"example": "yubikey-5c"
+			}
+		}
+	},
+	"WEBAUTHN_UNAVAILABLE": {
+		"description": "Error shown by the 'webauthn' SSH agent backend when the browser does not support the Web Authentication (WebAuthn) API. 'WebAuthn' is a technical name and probably should not be translated.",
+		"message": "WebAuthn is not available in this browser."
+	},
 	"WELCOME_CHANGELOG": {
 		"description": "A link to the ChangeLog file, displayed at startup. All the text here may be translated as makes sense.",
 		"message": "ChangeLog/release notes: $URL$",

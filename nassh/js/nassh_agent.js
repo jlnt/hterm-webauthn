@@ -17,6 +17,7 @@ import {
 
 import {Backend} from './nassh_agent_backend.js';
 import {GSC} from './nassh_agent_backend_gsc.js';
+import {WebAuthn} from './nassh_agent_backend_webauthn.js';
 import {Message} from './nassh_agent_message.js';
 import {FAILURE, MessageNumbers,
         writeMessage} from './nassh_agent_message_types.js';
@@ -41,6 +42,7 @@ function registerBackend(backendClass) {
 // Register the backend for use by Agent.
 registerBackend(Backend);
 registerBackend(GSC);
+registerBackend(WebAuthn);
 
 /**
  * Check whether a list of backend IDs is valid.
@@ -305,6 +307,15 @@ UserIO.prototype.showMessage = function(backendID, message) {
 };
 
 /**
+ * Print a line to the terminal window verbatim (e.g. for copy & pasting).
+ *
+ * @param {string} line
+ */
+UserIO.prototype.println = function(line) {
+  this.term_.io.println(line);
+};
+
+/**
  * Show a message in the terminal window and prompt the user for a string.
  *
  * @param {string} backendID The ID of the backend prompting the user.
@@ -314,6 +325,26 @@ UserIO.prototype.showMessage = function(backendID, message) {
  *     user cancels the prompt by pressing ESC.
  */
 UserIO.prototype.promptUser = async function(backendID, promptMessage) {
+  const {value} = await this.promptUserForm(backendID, promptMessage);
+  return value;
+};
+
+/**
+ * Show a message in the terminal window and prompt the user for a string, and
+ * optionally a yes/no choice.
+ *
+ * @param {string} backendID The ID of the backend prompting the user.
+ * @param {string} promptMessage The message that should precede the prompt.
+ * @param {{secret: (boolean|undefined),
+ *          checkboxLabel: (string|undefined)}=} options
+ *     secret: Mask the input (e.g. for PINs).  Defaults to true.
+ *     checkboxLabel: If set, also show an (unchecked) checkbox with this label.
+ * @return {!Promise<{value: string, checked: boolean}>} A promise resolving to
+ *     the input & checkbox state if the user confirms by pressing enter; a
+ *     rejecting promise if the user cancels the prompt by pressing ESC.
+ */
+UserIO.prototype.promptUserForm = async function(
+    backendID, promptMessage, {secret = true, checkboxLabel} = {}) {
   const io = this.term_.io.push();
 
   // Perform common cleanup tasks before exiting the prompt.
@@ -333,24 +364,39 @@ UserIO.prototype.promptUser = async function(backendID, promptMessage) {
   prompt.textContent = promptMessage;
   container.appendChild(prompt);
   const input = document.createElement('input');
-  input.type = 'password';
+  input.type = secret ? 'password' : 'text';
   input.ariaLabel = promptMessage;
   container.appendChild(input);
 
-  const toggle = document.createElement('img');
-  toggle.src = IMG_VISIBILITY_URI;
-  toggle.style.cursor = 'pointer';
-  toggle.style.verticalAlign = 'middle';
-  toggle.addEventListener('click', (e) => {
-    if (input.type === 'text') {
-      input.type = 'password';
-      toggle.src = IMG_VISIBILITY_URI;
-    } else {
-      input.type = 'text';
-      toggle.src = IMG_VISIBILITY_OFF_URI;
-    }
-  });
-  container.appendChild(toggle);
+  if (secret) {
+    const toggle = document.createElement('img');
+    toggle.src = IMG_VISIBILITY_URI;
+    toggle.style.cursor = 'pointer';
+    toggle.style.verticalAlign = 'middle';
+    toggle.addEventListener('click', (e) => {
+      if (input.type === 'text') {
+        input.type = 'password';
+        toggle.src = IMG_VISIBILITY_URI;
+      } else {
+        input.type = 'text';
+        toggle.src = IMG_VISIBILITY_OFF_URI;
+      }
+    });
+    container.appendChild(toggle);
+  }
+
+  const focusables = [input];
+  let checkbox = null;
+  if (checkboxLabel !== undefined) {
+    const label = document.createElement('label');
+    label.style.display = 'block';
+    checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    label.appendChild(checkbox);
+    label.appendChild(document.createTextNode(` ${checkboxLabel}`));
+    container.appendChild(label);
+    focusables.push(checkbox);
+  }
 
   io.showOverlay(container, null);
 
@@ -358,8 +404,10 @@ UserIO.prototype.promptUser = async function(backendID, promptMessage) {
   setTimeout(() => input.focus());
 
   // The terminal will eat all key events, so make sure we stop that.
-  input.addEventListener('keyup', (e) => e.stopPropagation(), true);
-  input.addEventListener('keypress', (e) => e.stopPropagation(), true);
+  for (const element of focusables) {
+    element.addEventListener('keyup', (e) => e.stopPropagation(), true);
+    element.addEventListener('keypress', (e) => e.stopPropagation(), true);
+  }
 
   // If the terminal becomes active for some reason, force back to the input.
   io.onVTKeystroke = io.sendString = (string) => {
@@ -368,15 +416,19 @@ UserIO.prototype.promptUser = async function(backendID, promptMessage) {
 
   return new Promise((resolve, reject) => {
     // Keep accepting input until they press Enter or Escape.
-    input.addEventListener('keydown', (e) => {
+    const onKeyDown = (e) => {
       e.stopPropagation();
       if (e.key === 'Enter') {
+        e.preventDefault();
         cleanup();
-        resolve(input.value);
+        resolve({value: input.value, checked: !!checkbox?.checked});
       } else if (e.key === 'Escape') {
         cleanup();
         reject();
       }
-    }, true);
+    };
+    for (const element of focusables) {
+      element.addEventListener('keydown', onKeyDown, true);
+    }
   });
 };

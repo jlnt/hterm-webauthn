@@ -78,6 +78,15 @@ export class Backend {
   }
 
   /**
+   * Print a line to the terminal window verbatim (e.g. for copy & pasting).
+   *
+   * @param {string} line
+   */
+  println(line) {
+    this.userIO_.println(line);
+  }
+
+  /**
    * Show a message in the terminal window and prompt the user for a string.
    *
    * @param {string} promptMessage The message that should precede the prompt.
@@ -89,6 +98,24 @@ export class Backend {
    */
   async promptUser(promptMessage) {
     return this.userIO_.promptUser(this.BACKEND_ID, promptMessage);
+  }
+
+  /**
+   * Show a message in the terminal window and prompt the user for a string,
+   * and optionally a yes/no choice.
+   *
+   * @param {string} promptMessage The message that should precede the prompt.
+   *     Note: The message should consist of a localized string obtained via
+   *     localize.
+   * @param {{secret: (boolean|undefined),
+   *          checkboxLabel: (string|undefined)}=} options See
+   *     UserIO.promptUserForm.
+   * @return {!Promise<{value: string, checked: boolean}>} A promise resolving
+   *     to the input & checkbox state if the user confirms by pressing enter;
+   *     a rejecting promise if the user cancels the prompt by pressing ESC.
+   */
+  async promptUserForm(promptMessage, options) {
+    return this.userIO_.promptUserForm(this.BACKEND_ID, promptMessage, options);
   }
 }
 

@@ -257,6 +257,12 @@ The vast majority of the code here lives under [js/].
   * [nassh_agent_backend_gsc.js]:
     An SSH agent backend that supports private keys stored on smart cards,
     using the Google Smart Card Connector app.
+  * [nassh_agent_backend_webauthn.js]:
+    An SSH agent backend that supports FIDO2/U2F security keys & passkeys
+    (OpenSSH `sk-ecdsa` keys) via the browser's WebAuthn API.
+  * [nassh_webauthn_keys.js]:
+    Creating, importing & storing the security keys used by the webauthn
+    backend.
 
 There are a few specialized modules that are not relevant to the core
 Secure Shell logic.
@@ -415,6 +421,7 @@ Here's a random list of documents which would be useful to people.
 [nassh_agent.js]: ../js/nassh_agent.js
 [nassh_agent_backend.js]: ../js/nassh_agent_backend.js
 [nassh_agent_backend_gsc.js]: ../js/nassh_agent_backend_gsc.js
+[nassh_agent_backend_webauthn.js]: ../js/nassh_agent_backend_webauthn.js
 [nassh_agent_message.js]: ../js/nassh_agent_message.js
 [nassh_agent_message_types.js]: ../js/nassh_agent_message_types.js
 [nassh_background.js]: ../js/nassh_background.js
@@ -439,6 +446,7 @@ Here's a random list of documents which would be useful to people.
 [nassh_stream_sshagent_relay.js]: ../js/nassh_stream_sshagent_relay.js
 [nassh_test.js]: ../js/nassh_test.js
 [nassh_tests.js]: ../js/nassh_tests.js
+[nassh_webauthn_keys.js]: ../js/nassh_webauthn_keys.js
 
 [FAQ]: FAQ.md
 

@@ -95,6 +95,12 @@ The following backends are currently implemented:
   OpenPGP-enabled smart cards. **Note:** Requires the
   [Smart Card Connector app](https://chrome.google.com/webstore/detail/khpfeaanjngmcnplbdlpegiifgpfgdco)
   to be installed.
+* `webauthn`:
+  Supports SSH authentication using FIDO2/U2F security keys (or passkeys) via
+  the browser's WebAuthn API, using OpenSSH `sk-ecdsa-sha2-nistp256` keys.
+  If no key has been set up yet, offers to create (or import) one when
+  connecting.
+  See [security-keys.md](./security-keys.md) for details.
 
 ## `--ssh-agent=<extension id>`
 

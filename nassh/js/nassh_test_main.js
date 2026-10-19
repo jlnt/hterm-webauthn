@@ -15,6 +15,7 @@ libTest.main({
     'lib_array_tests.js',
     'lib_credential_cache_tests.js',
     'nasftp_cli_tests.js',
+    'nassh_agent_backend_webauthn_tests.js',
     'nassh_agent_message_tests.js',
     'nassh_agent_message_types_tests.js',
     'nassh_agent_tests.js',
@@ -31,6 +32,7 @@ libTest.main({
     'nassh_sftp_packet_types_tests.js',
     'nassh_stream_relay_corpv4_tests.js',
     'nassh_tests.js',
+    'nassh_webauthn_keys_tests.js',
     'ssh_policy_tests.js',
     // go/keep-sorted end
   ],
