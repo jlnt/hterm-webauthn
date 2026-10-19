@@ -119,9 +119,12 @@ class DirWatcher {
    * @return {!Promise<void>} Promise that resolves when the load finishes.
    */
   load() {
-    return filesystem.readDirectory(this.path).then((entries) => {
-      entries.files.forEach((file) => this.addFile_(file));
-    });
+    return filesystem.readDirectory(this.path)
+      .then((entries) => {
+        entries.files.forEach((file) => this.addFile_(file));
+      })
+      // The directory doesn't exist until the first connection.
+      .catch(() => {});
   }
 
   /**
